@@ -1,0 +1,127 @@
+digraph G {
+  rankdir=TB;
+  vial [shape=circle, label="Vial"];
+  add_fillerA [shape=box, label="+"];
+  add_fillerB [shape=box, label="+"];
+  add_binder [shape=box, label="+"];
+  mixing [shape=box, label="mixing"];
+  mixture [shape=circle, label="mixture"];
+
+  measure_fillerA [
+    shape=none,
+    label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+            <TR>
+                <TD COLSPAN="4" ALIGN="LEFT">
+                    Filler A
+                </TD>
+            </TR>
+            <TR>
+                <TD BORDER="1"> vial </TD>
+                <TD BORDER="1"> A </TD>
+                <TD BORDER="1"> B </TD>
+                <TD BORDER="1"> C </TD>
+            </TR>
+            <TR>
+                <TD BORDER="1"> design </TD>
+                <TD BORDER="1"> 98 </TD>
+                <TD BORDER="1"> 42 </TD>
+                <TD BORDER="1"> 0 </TD>
+            </TR>
+            <TR>
+                <TD BORDER="1"> log </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+            </TR>
+            <TR>
+                <TD BORDER="1"> concentration </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+            </TR>
+        </TABLE>
+    >
+  ];
+
+  measure_fillerB [
+    shape=none,
+    label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+            <TR>
+                <TD COLSPAN="4" ALIGN="LEFT">
+                    Filler B
+                </TD>
+            </TR>
+            <TR>
+                <TD BORDER="1"> design </TD>
+                <TD BORDER="1"> 42 </TD>
+                <TD BORDER="1"> 98 </TD>
+                <TD BORDER="1"> 0 </TD>
+            </TR>
+            <TR>
+                <TD BORDER="1"> log </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+            </TR>
+            <TR>
+                <TD BORDER="1"> concentration </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+            </TR>
+        </TABLE>
+    >
+  ];
+
+  measure_binder [
+    shape=none,
+    label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+            <TR>
+                <TD COLSPAN="4" ALIGN="LEFT">
+                    Binder
+                </TD>
+            </TR>
+            <TR>
+                <TD BORDER="1"> design </TD>
+                <TD BORDER="1"> 60 </TD>
+                <TD BORDER="1"> 60 </TD>
+                <TD BORDER="1"> 60 </TD>
+            </TR>
+            <TR>
+                <TD BORDER="1"> log </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+            </TR>
+            <TR>
+                <TD BORDER="1"> concentration </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+                <TD BORDER="1">  </TD>
+            </TR>
+        </TABLE>
+    >
+  ];
+  mixing_condition [shape=none, label="100rpm * 30min"]
+
+  vial -> add_fillerA [dir=none];
+  add_fillerA -> add_fillerB [dir=none];
+  add_fillerB -> add_binder [dir=none];
+  add_binder -> mixing [dir=none];
+  mixing -> mixture;
+  
+  {rank = same; add_fillerA; measure_fillerA}
+  measure_fillerA -> add_fillerA [constraint=false]
+
+  {rank = same; add_fillerB; measure_fillerB}
+  measure_fillerB -> add_fillerB [constraint=false]
+
+  {rank = same; add_binder; measure_binder}
+  measure_binder -> add_binder [constraint=false]
+
+  {rank = same; mixing; mixing_condition}
+  mixing_condition -> mixing [style=invis, constraint=false]
+}
