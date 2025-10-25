@@ -9,8 +9,8 @@ import panel as pn
 from bokeh.models.widgets.tables import NumberEditor, StringEditor, CheckboxEditor
 from bokeh.models.widgets.tables import NumberFormatter
 
-from logic import SourceMaterial, Composition, Weight, Work, Result
-from logic import PreMixture, WeightPremixture, WorkPreMixture, ResultPreMixture
+from src.logic import SourceMaterial, Composition, Weight, Work, Result
+from src.logic import PreMixture, WeightPremixture, WorkPreMixture, ResultPreMixture
 
 pn.extension('tabulator', 'floatpanel')
 
