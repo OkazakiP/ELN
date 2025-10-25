@@ -64,11 +64,12 @@ workpremixture = logic.WorkPreMixture(weight=weightpremixture)
 result = logic.Result(work=work)
 result_premixture = logic.ResultPreMixture(workpremixture)
 
-table_material = ViewSourceMaterial(data=material, floating=FLOATING)
+table_material = ViewSourceMaterial(data=material, floating=FLOATING, align='center')
+# CANNOT align Tabulator although table_material can do it.
 table_composition = ViewComposition(
-    data=composition, title='02. Composition', floating=FLOATING
+    data=composition, title='02. Composition', floating=FLOATING, align='center'
 )
-table_premixture = ViewPremixture(data=premixture, title='03. PreMixture', floating=FLOATING)
+table_premixture = ViewPremixture(data=premixture, title='03. PreMixture', floating=FLOATING, align='center')
 table_weight = ViewWeight(data=weight, title='04. Target Weight', floating=FLOATING)
 table_weight_premixture = ViewWeightPreMixture(
     data=weightpremixture, title='05. Target PreMixture', floating=FLOATING

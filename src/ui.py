@@ -24,11 +24,13 @@ class FloatingView(pn.viewable.Viewer):
                         'left-bottom', 'center-bottom', 'right-bottom'
                         ] = 'left-top',
             floating: bool = True,
+            align: Literal['start', 'center', 'end'] = 'end',
             **kwargs
         ):
         self.title = title
         self.position = position
         self.floating = floating
+        self.align = align
         super().__init__(**kwargs)
 
 
@@ -49,7 +51,7 @@ class ViewSourceMaterial(FloatingView):
         )
         table = pn.widgets.Tabulator.from_param(
             parameter, editors=editor, show_index=False,
-            configuration=dict(clipboard=True),
+            configuration=dict(clipboard=True), align=self.align
         )
         float_config = dict(
             headerControls=dict(
@@ -64,7 +66,9 @@ class ViewSourceMaterial(FloatingView):
                 config=float_config
             )
         else:
-            return pn.Column(nrows, table, name='01. Source Material')
+            return pn.Column(
+                nrows, table, name='01. Source Material', align=self.align
+            )
 
 
 
@@ -91,7 +95,7 @@ class ViewPremixture(FloatingView):
         editor = self.make_editor()
         table = pn.widgets.Tabulator.from_param(
             parameter, editors=editor, show_index=False,
-            configuration=dict(clipboard=True),
+            configuration=dict(clipboard=True), align=self.align,
         )
         return table
 
@@ -100,7 +104,7 @@ class ViewPremixture(FloatingView):
         name = parameterized._name
         nrows = pn.widgets.IntInput.from_param(
             parameterized.param.nrows, start=1, step=1,
-            name=f'N {name}'
+            name=f'N {name}', align=self.align
         )
         float_config = dict(
             headerControls=dict(
@@ -114,7 +118,9 @@ class ViewPremixture(FloatingView):
                 position=self.position, contained=True,
             )
         else: 
-            return pn.Column(nrows, self.make_table, name=self.title)
+            return pn.Column(
+                nrows, self.make_table, name=self.title, align=self.align
+            )
 
 
 
