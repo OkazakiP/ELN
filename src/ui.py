@@ -12,8 +12,6 @@ from bokeh.models.widgets.tables import NumberFormatter
 from src.logic import SourceMaterial, Composition, Weight, Work, Result
 from src.logic import PreMixture, WeightPremixture, WorkPreMixture, ResultPreMixture
 
-pn.extension('tabulator', 'floatpanel')
-
 
 
 class FloatingView(pn.viewable.Viewer):

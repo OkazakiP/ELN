@@ -6,10 +6,11 @@ import pandas as pd
 import panel as pn
 
 from src import logic
-
 from src.ui import ViewSourceMaterial, ViewPremixture, ViewWeight, ViewWeightPreMixture
 from src.ui import ViewComposition, ViewWork, ViewWorkPreMixture
 from src.ui import ViewResult, ViewResultPreMixture
+
+pn.extension('tabulator', 'floatpanel', 'katex', 'mathjax')
 
 
 def list_logic_obj():
