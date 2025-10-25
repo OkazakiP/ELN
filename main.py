@@ -96,9 +96,18 @@ gstack[0, 0] = table_material
 gstack[0, 1] = table_composition
 gstack[0, 2] = table_premixture
 gstack[1, 0] = table_weight
-latex = latex = pn.pane.LaTeX(
-    r'The LaTeX pane supports two delimiters: $LaTeX$ and \(LaTeX\)', styles={'font-size': '18pt'}
-)
+arrow_svg = """
+<svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto" markerUnits="strokeWidth">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#000" />
+    </marker>
+  </defs>
+  <line x1="95" y1="50" x2="15" y2="50" stroke="#000" stroke-width="2" marker-end="url(#arrowhead)" />
+</svg>
+"""
+pane_svg = pn.pane.HTML(arrow_svg, width=None, height=None)
+gstack[1, 1] = pane_svg
 gstack[1, 2] = table_weight_premixture
 gstack[2, 0] = table_work
 gstack[2, 2] = table_work_premixture
