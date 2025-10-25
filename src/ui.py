@@ -23,10 +23,12 @@ class FloatingView(pn.viewable.Viewer):
                         'left-center', 'center', 'right-center',
                         'left-bottom', 'center-bottom', 'right-bottom'
                         ] = 'left-top',
+            floating: bool = True,
             **kwargs
         ):
         self.title = title
         self.position = position
+        self.floating = floating
         super().__init__(**kwargs)
 
 
@@ -54,12 +56,15 @@ class ViewSourceMaterial(FloatingView):
                 close='remove', maximize='remove', minimize='remove'
             )
         )
-        return pn.layout.FloatPanel(
-            nrows, table,
-            name='01. Source Material',
-            margin=5,
-            config=float_config
-        )
+        if self.floating:
+            return pn.layout.FloatPanel(
+                nrows, table,
+                name='01. Source Material',
+                margin=5,
+                config=float_config
+            )
+        else:
+            return pn.Column(nrows, table, name='01. Source Material')
 
 
 
@@ -102,11 +107,14 @@ class ViewPremixture(FloatingView):
                 close='remove', maximize='remove', minimize='remove'
             )
         )
-        return pn.layout.FloatPanel(
-            nrows, self.make_table,
-            name=self.title, margin=20, config=float_config,
-            position=self.position, contained=True,
-        )
+        if self.floating:
+            return pn.layout.FloatPanel(
+                nrows, self.make_table,
+                name=self.title, margin=20, config=float_config,
+                position=self.position, contained=True,
+            )
+        else: 
+            return pn.Column(nrows, self.make_table, name=self.title)
 
 
 
@@ -170,11 +178,14 @@ class ViewWeight(FloatingView):
                 close='remove', maximize='remove', minimize='remove'
             )
         )
-        return pn.layout.FloatPanel(
-            digit, self.make_table,
-            name=self.title, margin=20, config=float_config,
-            position=self.position, contained=True,
-        )
+        if self.floating:
+            return pn.layout.FloatPanel(
+                digit, self.make_table,
+                name=self.title, margin=20, config=float_config,
+                position=self.position, contained=True,
+            )
+        else:
+            return pn.Column(digit, self.make_table, name=self.title)
 
 
 
@@ -253,11 +264,14 @@ class ViewWork(FloatingView):
                 close='remove', maximize='remove', minimize='remove'
             )
         )
-        return pn.layout.FloatPanel(
-            threshold, self.make_table,
-            name=self.title, margin=20, config=float_config,
-            position=self.position, contained=True,
-        )
+        if self.floating:
+            return pn.layout.FloatPanel(
+                threshold, self.make_table,
+                name=self.title, margin=20, config=float_config,
+                position=self.position, contained=True,
+            )
+        else:
+            return pn.Column(threshold, self.make_table, name=self.title)
 
 
 
@@ -303,11 +317,15 @@ class ViewResult(FloatingView):
                 close='remove', maximize='remove', minimize='remove'
             )
         )
-        return pn.layout.FloatPanel(
-            self.make_table,
-            name=self.title, margin=20, config=float_config,
-            position=self.position, contained=True,
-        )
+        if self.floating:
+            return pn.layout.FloatPanel(
+                self.make_table,
+                name=self.title, margin=20, config=float_config,
+                position=self.position, contained=True,
+            )
+        else:
+            return pn.Column(self.make_table, name=self.title)
+
 
 
 
