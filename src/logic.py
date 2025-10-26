@@ -1,5 +1,5 @@
 # %%
-from typing import Optional, Literal, cast
+from typing import List, Optional, Literal, cast
 import numpy as np
 import pandas as pd
 import param
@@ -806,6 +806,92 @@ class Result(param.Parameterized):
         ).fillna(0.)
         data = data_premixture.add(data_material).div(total, axis=0).reset_index()
         self.data = data
+
+
+
+class Process(param.Parameterized):
+    """Recording table in the flow chart.
+    
+    Attributes
+    ----------
+    material: str
+        Name of source material or premixture.
+    weight: Weight
+        Designed value.
+    work: Work
+        Record of how weighted.
+    result: Result
+        Resulted concentration.
+    data: pd.DataFrame
+        Table data.
+    record: pd.Series
+        Record row in the data.
+    """
+    weight = param.ClassSelector(class_=Weight, allow_refs=True)
+    work = param.ClassSelector(class_=Work, allow_refs=True)
+    result = param.ClassSelector(class_=Result, allow_refs=True)
+    data = param.DataFrame(allow_None=True)
+
+    def __init__(
+            self,
+            material: str,
+            weight: Weight,
+            work: Work,
+            result: Result,
+            data: Optional[pd.DataFrame] = None,
+            **params
+        ):
+        self.material = material
+        super().__init__(
+            weight=weight, work=work, result=result, data=data,
+            **params
+        )
+
+    @param.depends('weight.data', watch=True, on_init=True)
+    def make_data(self):
+        """Generate table data when weight desine updated.
+        """
+        weight = cast(Weight, self.weight)
+        result = cast(Result, self.result)
+        doe = cast(pd.DataFrame, weight.data).set_index('Composition')
+        design = doe[self.material]
+        conc = (
+            cast(pd.DataFrame, result.data)
+            .set_index('Composition')
+            [self.material]
+            .rename('Concentration')
+        )
+        try:
+            record = cast(pd.DataFrame, self.data).T['Record']
+        except AttributeError:
+            record = conc.copy().rename('Record').mul(0.)
+        data = pd.concat([design, record, conc], axis=1).T
+        self.record = record
+        self.data = data
+
+    @param.depends('data', watch=True, on_init=False)
+    def update_work(self):
+        """Update resulted concentration.
+        """
+        work = cast(Work, self.work)
+        work_data = (
+            cast(pd.DataFrame, work.data)
+            .set_index('Composition')
+        )
+        work_record = work_data[self.material]
+        if (self.record == work_record).all():
+            return
+        weight = cast(Weight, work.weight)
+        composition = cast(Composition, weight.composition)
+        material = cast(SourceMaterial, composition.material)
+        names = cast(List, material.names)
+        data = (
+            work_data
+            .drop([self.material], axis=1)
+            .join(self.record)
+            .reindex(names, axis=1)
+        )
+        work.data = data
 
 
 
