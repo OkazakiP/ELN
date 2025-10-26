@@ -1,4 +1,3 @@
-# %%
 from typing import List, Optional, Literal, cast
 import numpy as np
 import pandas as pd
@@ -880,22 +879,19 @@ class Process(param.Parameterized):
         )
         work_record = work_data[self.material]
         if (self.record == work_record).all():
+            # This method can be triggered by self.make_data.
             return
-        weight = cast(Weight, work.weight)
-        composition = cast(Composition, weight.composition)
-        material = cast(SourceMaterial, composition.material)
-        names = cast(List, material.names)
         data = (
             work_data
             .drop([self.material], axis=1)
             .join(self.record)
-            .reindex(names, axis=1)
+            .reindex(work_data.columns, axis=1)
+            .reset_index()
         )
         work.data = data
 
 
 
-# %%
 if __name__=='__main__':
     material = SourceMaterial(
         data=pd.DataFrame(
@@ -935,3 +931,4 @@ if __name__=='__main__':
         axis=0
     ).reset_index(drop=True)
     result = Result(work)
+    process = Process(material.names[0], weight, work, result)
