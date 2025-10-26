@@ -15,6 +15,19 @@ from src.logic import PreMixture, WeightPremixture, WorkPreMixture, ResultPreMix
 
 
 class FloatingView(pn.viewable.Viewer):
+    """Mixin class for (floating) tables.
+
+    Attributes
+    ----------
+    title: str
+        The title of the table.
+    position: str
+        Initial position where the table is rendered.
+    floating: bool
+        Whether floating is enabled or not.
+    align: str
+        How to align contents.
+    """
     def __init__(
             self,
             title: str = '',
@@ -36,6 +49,23 @@ class FloatingView(pn.viewable.Viewer):
 
 
 class ViewSourceMaterial(FloatingView):
+    """List source materials.
+
+    The number of materials is controlled by user input.
+
+    Attributes
+    ----------
+    title: str
+        The title of the table.
+    position: str
+        Initial position where the table is rendered.
+    floating: bool
+        Whether floating is enabled or not.
+    align: str
+        How to align contents.
+    data: SourceMaterial
+        Backend logic.
+    """
     data = param.ClassSelector(class_=SourceMaterial)
 
     def __panel__(self):
@@ -73,9 +103,30 @@ class ViewSourceMaterial(FloatingView):
 
 
 class ViewPremixture(FloatingView):
+    """Premixture design.
+
+    The number of premixtures is controlled by user input.
+
+    Attributes
+    ----------
+    title: str
+        The title of the table.
+    position: str
+        Initial position where the table is rendered.
+    floating: bool
+        Whether floating is enabled or not.
+    align: str
+        How to align contents.
+    data: PreMixture
+        Backend logic.
+    """
     data = param.ClassSelector(class_=PreMixture)
 
     def make_editor(self) -> dict:
+        """Yield editor for Tabulator.
+        
+        Tabulator accepts editor that defines data type of each columns.
+        """
         parameterized = cast(PreMixture, self.data)
         material = cast(SourceMaterial, parameterized.material)
         material_names = cast(list[str], material.names)
@@ -90,6 +141,8 @@ class ViewPremixture(FloatingView):
 
     @param.depends('data.data', watch=False)
     def make_table(self):
+        """Generate editable table.
+        """
         parameterized = cast(PreMixture, self.data)
         parameter = cast(param.Parameter, parameterized.param.data)
         editor = self.make_editor()
@@ -125,9 +178,30 @@ class ViewPremixture(FloatingView):
 
 
 class ViewComposition(ViewPremixture):
+    """Composition design.
+
+    The number of compositions is controlled by user input.
+
+    Attributes
+    ----------
+    title: str
+        The title of the table.
+    position: str
+        Initial position where the table is rendered.
+    floating: bool
+        Whether floating is enabled or not.
+    align: str
+        How to align contents.
+    data: Composition
+        Backend logic.
+    """
     data = param.ClassSelector(class_=Composition)
 
     def make_editor(self) -> dict:
+        """Yield editor for Tabulator.
+        
+        Tabulator accepts editor that defines data type of each columns.
+        """
         parameterized = cast(Composition, self.data)
         material = cast(SourceMaterial, parameterized.material)
         material_names = cast(list[str], material.names)
@@ -148,10 +222,27 @@ class ViewComposition(ViewPremixture):
 
 
 class ViewWeight(FloatingView):
+    """Calcurated weight of eache materials for compositions.
+
+    Attributes
+    ----------
+    title: str
+        The title of the table.
+    position: str
+        Initial position where the table is rendered.
+    floating: bool
+        Whether floating is enabled or not.
+    align: str
+        How to align contents.
+    data: Weight
+        Backend logic.
+    """
     data = param.ClassSelector(class_=Weight)
 
     @param.depends('data.digit', watch=False)
     def make_table(self) -> pn.widgets.Tabulator:
+        """Generate editable table.
+        """
         weight = cast(Weight, self.data)
         digit = cast(int, weight.digit)
         parameter = cast(param.Parameter, weight.param.data)
@@ -196,10 +287,27 @@ class ViewWeight(FloatingView):
 
 
 class ViewWeightPreMixture(ViewWeight):
+    """Calcurated weight of eache materials for premixtures.
+
+    Attributes
+    ----------
+    title: str
+        The title of the table.
+    position: str
+        Initial position where the table is rendered.
+    floating: bool
+        Whether floating is enabled or not.
+    align: str
+        How to align contents.
+    data: WeightPremixture
+        Backend logic.
+    """
     data = param.ClassSelector(class_=WeightPremixture)
 
     @param.depends('data.digit', watch=False)
     def make_table(self) -> pn.widgets.Tabulator: # type: ignore[override]
+        """Generate editable table.
+        """
         weight = cast(WeightPremixture, self.data)
         digit = cast(int, weight.digit)
         parameter = cast(param.Parameter, weight.param.data)
@@ -222,10 +330,43 @@ class ViewWeightPreMixture(ViewWeight):
 
 
 class ViewWork(FloatingView):
+    """Record how weight materials for compositions.
+
+    Attributes
+    ----------
+    title: str
+        The title of the table.
+    position: str
+        Initial position where the table is rendered.
+    floating: bool
+        Whether floating is enabled or not.
+    align: str
+        How to align contents.
+    data: Work
+        Backend logic.
+    threshold: float
+        Acceptable error (%) for weighting.
+    """
     data = param.ClassSelector(class_=Work)
     threshold = param.Number(default=0.01)
 
     def validate(self, value, target):
+        """Check the weighted value is acceptable or not.
+        
+        Parameters
+        ----------
+        value: float
+            Weighted amount.
+        target: float
+            Designed amount.
+        
+        Return
+        ------
+        res: str
+            Acceptable -> "blue"
+            Fail -> "red"
+            Empty cell -> "black"
+        """
         try:
             res = abs(value/target - 1) < self.threshold
             res = 'blue' if res else 'red'
@@ -236,6 +377,10 @@ class ViewWork(FloatingView):
         return res
 
     def coloring(self, s):
+        """Yield color setting for each cells.
+        
+        Colors are decided baising on acceptable error or not.
+        """
         work = cast(Work, self.data)
         weight = cast(Weight, work.weight)
         weight_data = cast(pd.DataFrame, weight.data)
@@ -247,6 +392,8 @@ class ViewWork(FloatingView):
 
     @param.depends('data.data', 'threshold', watch=False)
     def make_table(self) -> pn.widgets.Tabulator:
+        """Generate editable table.
+        """
         work = cast(Work, self.data)
         work_data = cast(pd.DataFrame, work.data)
         parameter = work.param.data
@@ -282,11 +429,30 @@ class ViewWork(FloatingView):
 
 
 class ViewWorkPreMixture(ViewWork):
+    """Record how weight materials for premixtures.
+
+    Attributes
+    ----------
+    title: str
+        The title of the table.
+    position: str
+        Initial position where the table is rendered.
+    floating: bool
+        Whether floating is enabled or not.
+    align: str
+        How to align contents.
+    data: WorkPreMixture
+        Backend logic.
+    threshold: float
+        Acceptable error (%) for weighting.
+    """
     data = param.ClassSelector(class_=WorkPreMixture)
     threshold = param.Number(default=0.01)
 
     @param.depends('data.data', 'threshold', watch=False)
     def make_table(self) -> pn.widgets.Tabulator: # type: ignore[override]
+        """Generate editale table.
+        """
         work = cast(Work, self.data)
         work_data = cast(pd.DataFrame, work.data)
         parameter = work.param.data
@@ -304,10 +470,27 @@ class ViewWorkPreMixture(ViewWork):
 
 
 class ViewResult(FloatingView):
+    """Show resulted concentration of compositions.
+
+    Attributes
+    ----------
+    title: str
+        The title of the table.
+    position: str
+        Initial position where the table is rendered.
+    floating: bool
+        Whether floating is enabled or not.
+    align: str
+        How to align contents.
+    data: Result
+        Backend logic.
+    """
     data = param.ClassSelector(class_=Result)
 
     @param.depends('data.data', watch=False)
     def make_table(self):
+        """Generate static table.
+        """
         result = cast(Result, self.data)
         data = cast(param.Parameter, result.param.data)
         result_data = cast(pd.DataFrame, result.data)
@@ -334,6 +517,33 @@ class ViewResult(FloatingView):
 
 
 
-
 class ViewResultPreMixture(ViewResult):
+    """Show resulted concentration of premixtures.
+
+    Attributes
+    ----------
+    title: str
+        The title of the table.
+    position: str
+        Initial position where the table is rendered.
+    floating: bool
+        Whether floating is enabled or not.
+    align: str
+        How to align contents.
+    data: ResultPreMixture
+        Backend logic.
+    """
     data = param.ClassSelector(class_=ResultPreMixture)
+
+
+
+class ProcessTable(pn.viewable.Viewer):
+    """Recording table in the flow chart.
+    
+    Attributes
+    ----------
+    weight: Weight
+    """
+    weight = param.ClassSelector(class_=Weight, allow_refs=True)
+    work = param.ClassSelector(class_=Work, allow_refs=True)
+    result = param.ClassSelector(class_=Result, allow_refs=True)
