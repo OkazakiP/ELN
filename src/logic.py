@@ -881,10 +881,16 @@ class Process(param.Parameterized):
         if (self.record == work_record).all():
             # This method can be triggered by self.make_data.
             return
+        record = (
+            cast(pd.DataFrame, self.data)
+            .T
+            ['Record']
+            .rename(self.material)
+        )
         data = (
             work_data
             .drop([self.material], axis=1)
-            .join(self.record)
+            .join(record)
             .reindex(work_data.columns, axis=1)
             .reset_index()
         )
