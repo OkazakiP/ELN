@@ -631,7 +631,7 @@ class WeightPremixture(Weight):
 
 
 class Work(param.Parameterized):
-    """Loggin how weight each materials and premixtures for compositions.
+    """Record how weight each materials and premixtures for compositions.
     
     Attribute
     ----------
