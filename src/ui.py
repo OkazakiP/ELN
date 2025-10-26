@@ -1,4 +1,4 @@
-from typing import cast, Literal
+from typing import cast, Literal, Optional, List
 
 import numpy as np
 import pandas as pd
@@ -11,6 +11,7 @@ from bokeh.models.widgets.tables import NumberFormatter
 
 from src.logic import SourceMaterial, Composition, Weight, Work, Result
 from src.logic import PreMixture, WeightPremixture, WorkPreMixture, ResultPreMixture
+from src.logic import Process
 
 
 
@@ -537,13 +538,38 @@ class ViewResultPreMixture(ViewResult):
 
 
 
-class ProcessTable(pn.viewable.Viewer):
+class ViewProcess(FloatingView):
     """Recording table in the flow chart.
     
     Attributes
     ----------
-    weight: Weight
+    title: str
+        The title of the table.
+    position: str
+        Initial position where the table is rendered.
+    floating: bool
+        Whether floating is enabled or not.
+    align: str
+        How to align contents.
+    data: Process
+        Backend logic.
     """
-    weight = param.ClassSelector(class_=Weight, allow_refs=True)
-    work = param.ClassSelector(class_=Work, allow_refs=True)
-    result = param.ClassSelector(class_=Result, allow_refs=True)
+    data = param.ClassSelector(class_=Process, allow_refs=True)
+
+    @param.depends('data.data', watch=True)
+    def make_table(self):
+        """Generate editable table.
+        """
+        process = cast(Process, self.data)
+        weight = cast(Weight, process.weight)
+        composition = cast(Composition, weight.composition)
+        material = cast(SourceMaterial, composition.material)
+        names = cast(List, material.names)
+        editor = {key: NumberEditor() for key in names}
+        table = pn.widgets.Tabulator.from_param(
+            process.param.data, editors=editor, show_index=True,
+        )
+        return table
+
+    def __panel__(self):
+        return pn.Column(self.make_table)

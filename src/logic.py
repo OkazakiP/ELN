@@ -846,7 +846,7 @@ class Process(param.Parameterized):
             **params
         )
 
-    @param.depends('weight.data', watch=True, on_init=True)
+    @param.depends('weight.data', 'result.data', watch=True, on_init=True)
     def make_data(self):
         """Generate table data when weight desine updated.
         """
@@ -873,14 +873,16 @@ class Process(param.Parameterized):
         """Update resulted concentration.
         """
         work = cast(Work, self.work)
-        work_data = (
-            cast(pd.DataFrame, work.data)
-            .set_index('Composition')
-        )
-        work_record = work_data[self.material]
-        if (self.record == work_record).all():
-            # This method can be triggered by self.make_data.
+        work_data = cast(pd.DataFrame, work.data).set_index('Composition')
+        current_record = cast(pd.DataFrame, self.data).T['Record']
+        # This method can be triggered by self.make_data.
+        if (self.record.isna().all() and current_record.isna().all()):
             return
+        notna = self.record.notna() | current_record.notna()
+        if (self.record[notna] == current_record[notna]).all():
+            return
+        else:
+            self.record = current_record
         record = (
             cast(pd.DataFrame, self.data)
             .T
@@ -895,6 +897,7 @@ class Process(param.Parameterized):
             .reset_index()
         )
         work.data = data
+        self.make_data() # type: ignore
 
 
 
